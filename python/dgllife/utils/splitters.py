@@ -492,7 +492,7 @@ class ScaffoldSplitter(object):
                 mol_scaffold = AllChem.MurckoDecompose(mol)
                 # Group molecules that have the same scaffold
                 scaffolds[mol_scaffold].append(i)
-            except:
+            except Exception:
                 print('Failed to compute the scaffold for molecule {:d} '
                       'and it will be excluded.'.format(i + 1))
 

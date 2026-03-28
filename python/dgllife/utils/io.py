@@ -66,7 +66,7 @@ def get_mol_3d_coordinates(mol):
             'Expect the number of atoms in the molecule and its conformation ' \
             'to be the same, got {:d} and {:d}'.format(mol_num_atoms, conf_num_atoms)
         return conf.GetPositions()
-    except:
+    except Exception:
         warnings.warn('Unable to get conformation of the molecule.')
         return None
 
@@ -118,8 +118,8 @@ def load_molecule(molecule_file, sanitize=False, calc_charges=False,
     elif molecule_file.endswith('.pdb'):
         mol = Chem.MolFromPDBFile(molecule_file, sanitize=False, removeHs=False)
     else:
-        return ValueError('Expect the format of the molecule_file to be '
-                          'one of .mol2, .sdf, .pdbqt and .pdb, got {}'.format(molecule_file))
+        raise ValueError('Expect the format of the molecule_file to be '
+                         'one of .mol2, .sdf, .pdbqt and .pdb, got {}'.format(molecule_file))
 
     try:
         if sanitize or calc_charges:
@@ -129,12 +129,12 @@ def load_molecule(molecule_file, sanitize=False, calc_charges=False,
             # Compute Gasteiger charges on the molecule.
             try:
                 AllChem.ComputeGasteigerCharges(mol)
-            except:
+            except Exception:
                 warnings.warn('Unable to compute charges for the molecule.')
 
         if remove_hs:
             mol = Chem.RemoveHs(mol)
-    except:
+    except Exception:
         return None, None
 
     if use_conformation:

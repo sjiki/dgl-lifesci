@@ -7,6 +7,7 @@
 # pylint: disable= no-member, arguments-differ, invalid-name
 
 import datetime
+import os
 import torch
 
 __all__ = ['EarlyStopping']
@@ -36,7 +37,7 @@ class EarlyStopping(object):
     metric : str or None
         A metric name that can be used to identify if a higher value is
         better, or vice versa. Default to None. Valid options include:
-        ``'r2'``, ``'mae'``, ``'rmse'``, ``'roc_auc_score'``.
+        ``'r2'``, ``'mae'``, ``'rmse'``, ``'roc_auc_score'``, ``'pr_auc_score'``.
 
     Examples
     --------
@@ -76,10 +77,10 @@ class EarlyStopping(object):
                 dt.date(), dt.hour, dt.minute, dt.second)
 
         if metric is not None:
-            assert metric in ['r2', 'mae', 'rmse', 'roc_auc_score'], \
+            assert metric in ['r2', 'mae', 'rmse', 'roc_auc_score', 'pr_auc_score'], \
                 "Expect metric to be 'r2' or 'mae' or " \
-                "'rmse' or 'roc_auc_score', got {}".format(metric)
-            if metric in ['r2', 'roc_auc_score']:
+                "'rmse' or 'roc_auc_score' or 'pr_auc_score', got {}".format(metric)
+            if metric in ['r2', 'roc_auc_score', 'pr_auc_score']:
                 print('For metric {}, the higher the better'.format(metric))
                 mode = 'higher'
             if metric in ['mae', 'rmse']:
@@ -174,6 +175,9 @@ class EarlyStopping(object):
         model : nn.Module
             Model instance.
         '''
+        dir_path = os.path.dirname(self.filename)
+        if dir_path:  # os.makedirs('') raises an error, so skip for current directory
+            os.makedirs(dir_path, exist_ok=True)
         torch.save({'model_state_dict': model.state_dict()}, self.filename)
 
     def load_checkpoint(self, model):
@@ -184,4 +188,4 @@ class EarlyStopping(object):
         model : nn.Module
             Model instance.
         '''
-        model.load_state_dict(torch.load(self.filename)['model_state_dict'])
+        model.load_state_dict(torch.load(self.filename, weights_only=True)['model_state_dict'])

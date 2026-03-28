@@ -3,6 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+import pytest
 import torch
 
 from dgllife.utils.splitters import *
@@ -45,6 +46,28 @@ def test_scaffold_splitter():
     dataset = TestDataset()
     ScaffoldSplitter.train_val_test_split(dataset)
     ScaffoldSplitter.k_fold_split(dataset, mols=dataset.mols)
+
+def test_scaffold_splitter_with_invalid_mol(capsys):
+    """ScaffoldSplitter should skip None molecules gracefully."""
+    dataset = TestDataset()
+    mols_with_none = dataset.mols + [None]
+
+    class DatasetWithNone(TestDataset):
+        def __init__(self):
+            super().__init__()
+            self.smiles = dataset.smiles + ['invalid']
+            self.mols = mols_with_none
+
+        def __len__(self):
+            return len(self.smiles)
+
+    ds = DatasetWithNone()
+    scaffold_sets = ScaffoldSplitter.get_ordered_scaffold_sets(ds.mols, log_every_n=None)
+    # None molecule causes an exception that is caught; valid molecules should still be grouped
+    valid_indices = [idx for group in scaffold_sets for idx in group]
+    assert len(valid_indices) == len(dataset.smiles)
+    captured = capsys.readouterr()
+    assert 'Failed to compute the scaffold' in captured.out
 
 def test_single_task_stratified_splitter():
     dataset = TestDataset()
