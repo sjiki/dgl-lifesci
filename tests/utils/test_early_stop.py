@@ -71,7 +71,7 @@ def test_early_stopping_low():
     remove_file('test.pkl')
 
 def test_early_stopping_high_metric():
-    for metric in ['r2', 'roc_auc_score']:
+    for metric in ['r2', 'roc_auc_score', 'pr_auc_score']:
         model1 = nn.Linear(2, 3)
         stopper = EarlyStopping(mode=None,
                                 patience=1,

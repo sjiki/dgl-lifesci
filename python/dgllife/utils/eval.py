@@ -23,12 +23,13 @@ class Meter(object):
     roughly at a same scale. During the evaluation, we need to undo the normalization on
     the predicted labels. If mean and std are not None, we will undo the normalization.
 
-    Currently we support evaluation with 4 metrics:
+    Currently we support evaluation with 5 metrics:
 
     * ``pearson r2``
     * ``mae``
     * ``rmse``
     * ``roc auc score``
+    * ``pr auc score``
 
     Parameters
     ----------
@@ -342,4 +343,4 @@ class Meter(object):
             return self.pr_auc_score(reduction)
         else:
             raise ValueError('Expect metric_name to be "r2" or "mae" or "rmse" '
-                             'or "roc_auc_score" or "pr_auc", got {}'.format(metric_name))
+                             'or "roc_auc_score" or "pr_auc_score", got {}'.format(metric_name))
