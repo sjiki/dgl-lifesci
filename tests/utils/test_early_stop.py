@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import pytest
 import torch
 import torch.nn as nn
 
@@ -128,8 +129,53 @@ def test_early_stopping_low_metric():
 
         remove_file('test.pkl')
 
+def test_early_stopping_invalid_metric():
+    with pytest.raises(AssertionError):
+        EarlyStopping(mode='higher', patience=5, metric='invalid_metric')
+
+def test_early_stopping_invalid_mode():
+    with pytest.raises(AssertionError):
+        EarlyStopping(mode='invalid_mode', patience=5)
+
+def test_early_stopping_auto_filename():
+    model = nn.Linear(2, 3)
+    stopper = EarlyStopping(mode='higher', patience=5)
+    assert stopper.filename.startswith('early_stop_')
+    stopper.step(1.0, model)
+    assert os.path.isfile(stopper.filename)
+    remove_file(stopper.filename)
+
+def test_early_stopping_subdir_filename():
+    import shutil
+    import tempfile
+    subdir = tempfile.mkdtemp()
+    filename = os.path.join(subdir, 'checkpoint.pth')
+    model = nn.Linear(2, 3)
+    stopper = EarlyStopping(mode='higher', patience=5, filename=filename)
+    stopper.step(1.0, model)
+    assert os.path.isfile(filename)
+    shutil.rmtree(subdir, ignore_errors=True)
+
+def test_early_stopping_counter_reset():
+    model = nn.Linear(2, 3)
+    stopper = EarlyStopping(mode='higher', patience=3, filename='test.pkl')
+    stopper.step(1.0, model)
+    stopper.step(0.5, model)
+    assert stopper.counter == 1
+    stopper.step(0.3, model)
+    assert stopper.counter == 2
+    # improvement resets counter
+    stopper.step(2.0, model)
+    assert stopper.counter == 0
+    remove_file('test.pkl')
+
 if __name__ == '__main__':
     test_early_stopping_high()
     test_early_stopping_low()
     test_early_stopping_high_metric()
     test_early_stopping_low_metric()
+    test_early_stopping_invalid_metric()
+    test_early_stopping_invalid_mode()
+    test_early_stopping_auto_filename()
+    test_early_stopping_subdir_filename()
+    test_early_stopping_counter_reset()

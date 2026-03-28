@@ -3,6 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+import pytest
 import torch
 
 from rdkit import Chem
@@ -200,6 +201,16 @@ def test_base_atom_featurizer():
                                         [1., 0., 0., 0., 0.],
                                         [1., 0., 0., 0., 0.]]))
 
+def test_base_atom_featurizer_invalid_feat_name():
+    test_featurizer = TestAtomFeaturizer()
+    with pytest.raises(ValueError, match='Expect feat_name to be in'):
+        test_featurizer.feat_size('nonexistent')
+
+def test_base_atom_featurizer_feat_name_none_multiple_features():
+    test_featurizer = TestAtomFeaturizer()
+    with pytest.raises(AssertionError):
+        test_featurizer.feat_size()
+
 def test_canonical_atom_featurizer():
     test_featurizer = CanonicalAtomFeaturizer()
     assert test_featurizer.feat_size() == 74
@@ -369,6 +380,16 @@ def test_base_bond_featurizer():
     feats = test_featurizer2(mol)
     assert torch.allclose(feats['h1'], torch.tensor([[0., 0., 1.]]))
     assert torch.allclose(feats['h2'], torch.tensor([[0., 0., 0., 0., 0., 0., 1.]]))
+
+def test_base_bond_featurizer_invalid_feat_name():
+    test_featurizer = TestBondFeaturizer()
+    with pytest.raises(ValueError, match='Expect feat_name to be in'):
+        test_featurizer.feat_size('nonexistent')
+
+def test_base_bond_featurizer_feat_name_none_multiple_features():
+    test_featurizer = TestBondFeaturizer()
+    with pytest.raises(AssertionError):
+        test_featurizer.feat_size()
 
 def test_canonical_bond_featurizer():
     test_featurizer = CanonicalBondFeaturizer()
