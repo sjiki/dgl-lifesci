@@ -862,7 +862,7 @@ class BaseAtomFeaturizer(object):
             feat_name = list(self.featurizer_funcs.keys())[0]
 
         if feat_name not in self.featurizer_funcs:
-            return ValueError('Expect feat_name to be in {}, got {}'.format(
+            raise ValueError('Expect feat_name to be in {}, got {}'.format(
                 list(self.featurizer_funcs.keys()), feat_name))
 
         if feat_name not in self._feat_sizes:
@@ -1624,7 +1624,7 @@ class BaseBondFeaturizer(object):
             feat_name = list(self.featurizer_funcs.keys())[0]
 
         if feat_name not in self.featurizer_funcs:
-            return ValueError('Expect feat_name to be in {}, got {}'.format(
+            raise ValueError('Expect feat_name to be in {}, got {}'.format(
                 list(self.featurizer_funcs.keys()), feat_name))
 
         mol = Chem.MolFromSmiles('CCO')

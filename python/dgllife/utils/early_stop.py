@@ -188,4 +188,4 @@ class EarlyStopping(object):
         model : nn.Module
             Model instance.
         '''
-        model.load_state_dict(torch.load(self.filename)['model_state_dict'])
+        model.load_state_dict(torch.load(self.filename, weights_only=True)['model_state_dict'])
